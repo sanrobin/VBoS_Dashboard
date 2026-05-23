@@ -1,0 +1,175 @@
+:root {
+  --bg: #0f172a;
+  --panel: #111827;
+  --muted: #94a3b8;
+  --text: #f8fafc;
+  --accent: #38bdf8;
+  --success: #2dd4bf;
+  --warning: #facc15;
+  --danger: #fb7185;
+  --border: rgba(148, 163, 184, 0.18);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  background: linear-gradient(180deg, #020617 0%, #111827 100%);
+  color: var(--text);
+}
+
+.app-shell {
+  min-height: 100vh;
+}
+
+.header {
+  padding: 24px 28px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.header p {
+  margin: 8px 0 0;
+  color: var(--muted);
+}
+
+.content {
+  padding: 28px;
+  display: grid;
+  gap: 24px;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(160px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  padding: 22px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.92);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18);
+}
+
+.card h3 {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.card p {
+  font-size: 2rem;
+  margin: 0;
+}
+
+.card-primary {
+  border-color: rgba(56, 189, 248, 0.4);
+}
+
+.card-secondary {
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.card-warning {
+  border-color: rgba(250, 204, 21, 0.4);
+}
+
+.card-danger {
+  border-color: rgba(251, 113, 133, 0.4);
+}
+
+.status-banner {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(160px, 1fr));
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.92);
+}
+
+.status-banner div {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.status-banner strong {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.map-panel,
+.table-panel {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.92);
+}
+
+.map-panel h2,
+.table-panel h2 {
+  margin-top: 0;
+}
+
+.map-container {
+  width: 100%;
+  min-height: 420px;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 720px;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 14px 12px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+th {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.loading {
+  padding: 20px;
+  text-align: center;
+  color: var(--accent);
+}
+
+@media (max-width: 960px) {
+  .cards-grid,
+  .status-banner {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .cards-grid,
+  .status-banner {
+    grid-template-columns: 1fr;
+  }
+}
