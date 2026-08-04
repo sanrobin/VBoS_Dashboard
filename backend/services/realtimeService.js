@@ -69,6 +69,12 @@ const processVehicleUpdate = async (deviceId, snapshot) => {
     inDestination
   };
 
+  if (activeTrip) {
+    state.latestVehicle.tokenId = activeTrip.tokenId;
+    state.latestVehicle.activeTripTokenId = activeTrip.tokenId;
+    state.latestVehicle.activeTripStatus = activeTrip.status;
+  }
+
   if (!activeTrip && inSource) {
     const newTrip = {
       tokenId: generateTokenId(),
@@ -161,14 +167,21 @@ const getRealtimeStats = () => {
 
 const getLatestVehicle = () => {
   if (!state.latestVehicle) return null;
+  const activeTrip = state.activeTrips.find((trip) => trip.deviceId === state.latestVehicle.deviceId);
   const lastSeen = new Date(state.latestVehicle.timestamp);
   const now = new Date();
+  const baseVehicle = {
+    ...state.latestVehicle,
+    tokenId: state.latestVehicle.tokenId || activeTrip?.tokenId || null,
+    activeTripTokenId: state.latestVehicle.activeTripTokenId || activeTrip?.tokenId || null,
+    activeTripStatus: state.latestVehicle.activeTripStatus || activeTrip?.status || null
+  };
   
   // Update status to OFFLINE if older than 2 minutes
   if (now - lastSeen > 120000) {
-    return { ...state.latestVehicle, deviceStatus: 'OFFLINE' };
+    return { ...baseVehicle, deviceStatus: 'OFFLINE' };
   }
-  return state.latestVehicle;
+  return baseVehicle;
 };
 
 module.exports = {

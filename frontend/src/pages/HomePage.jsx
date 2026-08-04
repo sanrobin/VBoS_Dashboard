@@ -37,7 +37,7 @@ function HomePage() {
           <strong>Vehicle Number:</strong> {vehicle.vehicleNumber || 'N/A'}
         </div>
         <div>
-          <strong>Token:</strong> {vehicle.tokenId || 'No Active Trip'}
+          <strong>Token:</strong> {vehicle.activeTripTokenId || vehicle.tokenId || 'No Active Trip'}
         </div>
         <div>
           <strong>Load Weight:</strong> {vehicle.loadWeight || 0} tons
