@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import './App.css';
 import HomePage from './pages/HomePage';
 import TripTable from './components/TripTable';
-import { fetchTrips } from './api/api';
+import { fetchTripsByDate, fetchTokenHistory } from './api/api';
 import logoFull from './assets/vbos_full.svg';
 import logoDark from './assets/vbos_dark.svg';
 import logoSmall from './assets/vbos.svg';
@@ -15,19 +15,119 @@ const icons = {
 };
 
 function TripHistoryPage() {
+  const today = new Date().toISOString().slice(0, 10);
+  const [selectedDate, setSelectedDate] = useState(today);
   const [trips, setTrips] = useState([]);
+  const [tokens, setTokens] = useState([]);
+  const [tokenPage, setTokenPage] = useState(1);
+  const [tokenPages, setTokenPages] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [showTokens, setShowTokens] = useState(false);
+
+  const loadTrips = async (date) => {
+    setLoading(true);
+    try {
+      const data = await fetchTripsByDate(date);
+      setTrips(data);
+    } catch (err) {
+      console.error('Failed to load trips', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadTokens = async (page) => {
+    try {
+      const data = await fetchTokenHistory(page);
+      setTokens(data.tokens || []);
+      setTokenPages(data.pages || 1);
+    } catch (err) {
+      console.error('Failed to load tokens', err);
+    }
+  };
 
   useEffect(() => {
-    fetchTrips().then(data => {
-      setTrips(data);
-      setLoading(false);
-    });
-  }, []);
+    loadTrips(selectedDate);
+  }, [selectedDate]);
+
+  useEffect(() => {
+    if (showTokens) loadTokens(tokenPage);
+  }, [showTokens, tokenPage]);
 
   return (
     <div className="content">
-      {loading ? <div>Loading history...</div> : <TripTable trips={trips} />}
+      <div className="history-header">
+        <h2>Trip History</h2>
+        <div className="history-controls">
+          <input
+            type="date"
+            className="date-picker"
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+          />
+          <button
+            className={`toggle-btn ${showTokens ? 'active' : ''}`}
+            onClick={() => setShowTokens(!showTokens)}
+          >
+            {showTokens ? 'Hide Token Chain' : 'Show Token Chain'}
+          </button>
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="loading">Loading trips...</div>
+      ) : (
+        <TripTable trips={trips} />
+      )}
+
+      {showTokens && (
+        <section className="table-panel token-chain-panel">
+          <h2>Token Chain (Blockchain Ledger)</h2>
+          <div className="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Token ID</th>
+                  <th>Action</th>
+                  <th>Vehicle</th>
+                  <th>Hash</th>
+                  <th>Previous Hash</th>
+                  <th>Timestamp</th>
+                </tr>
+              </thead>
+              <tbody>
+                {tokens.length === 0 ? (
+                  <tr><td colSpan="6">No token chain records.</td></tr>
+                ) : (
+                  tokens.map((t) => (
+                    <tr key={t._id}>
+                      <td className="token-cell">{t.tokenId}</td>
+                      <td>
+                        <span className={`action-badge action-${t.action.toLowerCase()}`}>
+                          {t.action}
+                        </span>
+                      </td>
+                      <td>{t.vehicleNumber}</td>
+                      <td title={t.tokenHash}>{t.tokenHash?.slice(0, 12)}…</td>
+                      <td title={t.prevTokenHash}>
+                        {t.prevTokenHash === 'GENESIS' ? '🔗 GENESIS' : t.prevTokenHash?.slice(0, 12) + '…'}
+                      </td>
+                      <td>{new Date(t.timestamp).toLocaleString()}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+          {tokenPages > 1 && (
+            <div className="pagination">
+              <button disabled={tokenPage <= 1} onClick={() => setTokenPage(tokenPage - 1)}>← Prev</button>
+              <span>Page {tokenPage} of {tokenPages}</span>
+              <button disabled={tokenPage >= tokenPages} onClick={() => setTokenPage(tokenPage + 1)}>Next →</button>
+            </div>
+          )}
+        </section>
+      )}
     </div>
   );
 }

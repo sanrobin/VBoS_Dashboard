@@ -6,6 +6,7 @@
   --card-bg: #fff;
   --border-color: #eee;
   --hover-bg: #f3f4f6;
+  --muted-text: #6b7280;
   font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: var(--bg-color);
   color: var(--text-color);
@@ -18,6 +19,7 @@
   --card-bg: #1e1e1e;
   --border-color: #333;
   --hover-bg: #2a2a2a;
+  --muted-text: #9ca3af;
 }
 body {
   margin: 0;

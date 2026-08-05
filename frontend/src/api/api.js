@@ -7,4 +7,7 @@ const api = axios.create({
 
 export const fetchDashboard = () => api.get('/dashboard').then((res) => res.data);
 export const fetchTrips = () => api.get('/trips').then((res) => res.data);
-export const fetchVehicle = () => axios.get('http://localhost:5000/api/vehicle').then((res) => res.data);
+export const fetchVehicle = () => api.get('/vehicle').then((res) => res.data);
+export const fetchTripsByDate = (date) => api.get(`/trips/history?date=${date}`).then((res) => res.data);
+export const fetchTokenHistory = (page = 1) => api.get(`/trips/tokens?page=${page}&limit=20`).then((res) => res.data);
+export const fetchDailySummary = (date) => api.get(`/trips/daily-summary${date ? `?date=${date}` : ''}`).then((res) => res.data);

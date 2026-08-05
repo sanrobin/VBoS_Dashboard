@@ -2,7 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
-const { startFirebaseListener, getLatestVehicle, getActiveTripCount } = require('./services/realtimeService');
+const { startFirebaseListener, getLatestVehicle } = require('./services/realtimeService');
+const { startCleanupScheduler } = require('./services/cleanupService');
 const tripRoutes = require('./routes/tripRoutes');
 
 dotenv.config();
@@ -14,6 +15,7 @@ app.use(express.json());
 
 connectDB();
 startFirebaseListener();
+startCleanupScheduler();
 
 app.use('/api/trips', tripRoutes);
 

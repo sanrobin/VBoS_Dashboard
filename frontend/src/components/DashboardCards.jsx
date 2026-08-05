@@ -2,20 +2,29 @@ function DashboardCards({ data }) {
   return (
     <section className="cards-grid">
       <article className="card card-primary">
-        <h3>Total Trips</h3>
-        <p>{data.totalTrips}</p>
+        <h3>Trips Today</h3>
+        <p>{data.tripCountToday ?? data.totalTrips ?? 0}</p>
       </article>
       <article className="card card-secondary">
-        <h3>Active Trips</h3>
-        <p>{data.activeTrips}</p>
+        <h3>Remaining Trips</h3>
+        <p>{data.activeTrips ?? 0}</p>
       </article>
       <article className="card card-warning">
         <h3>Violations</h3>
-        <p>{data.violations}</p>
+        <p>{data.violations ?? 0}</p>
       </article>
       <article className="card card-danger">
         <h3>Overload Alerts</h3>
-        <p>{data.overloadAlerts}</p>
+        <p>{data.overloadAlerts ?? 0}</p>
+      </article>
+      <article className="card card-info">
+        <h3>Daily Limit</h3>
+        <p>{data.dailyLimit ?? '—'}</p>
+        <span className="card-sub">
+          {data.routeDistanceKm != null
+            ? `${data.routeDistanceKm.toFixed(2)} km route`
+            : ''}
+        </span>
       </article>
     </section>
   );
