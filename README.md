@@ -1,4 +1,4 @@
-# VBOS Intelligence
+# VBoS Intelligence
 
 IoT-based illegal mining transport monitoring using a MERN stack.
 
