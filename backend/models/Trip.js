@@ -30,7 +30,8 @@ const tripSchema = new mongoose.Schema({
   status: { type: String, enum: ['active', 'completed', 'violated'], default: 'active' },
   allowed: { type: Boolean, default: true },
   violated: { type: Boolean, default: false },
-  violationType: [{ type: String, enum: ['overload', 'limit_exceeded'] }],
+  violationType: [{ type: String, enum: ['overload', 'limit_exceeded', 'route_deviation', 'suspicious_stop', 'unapproved_zone'] }],
+  aiReasoning: { type: String, default: null },
   finalLatitude: Number,
   finalLongitude: Number,
   path: { type: [[Number]], default: [] }

@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const Trip = require('../models/Trip');
 const DailyTripCount = require('../models/DailyTripCount');
 const TokenChain = require('../models/TokenChain');
+const { evaluateGeofence, resetVehicleState } = require('./geminiGeofenceService');
 
 // ── Geofence Configuration (5 m radius for prototype) ──────────────────
 const SOURCE_GEOFENCE = { latitude: 9.904190, longitude: 78.034401, radiusMeters: 5 };
@@ -237,6 +238,54 @@ const processVehicleUpdate = async (deviceId, snapshot) => {
       activeTrip.hasLeftSource = true;
     }
 
+    // ── AI Geofence Evaluation (non-blocking, fail-safe) ─────────────
+    try {
+      const aiResult = await evaluateGeofence({
+        vehicleNumber,
+        deviceId,
+        currentLat: latitude,
+        currentLng: longitude,
+        sourceGeofence: {
+          lat: SOURCE_GEOFENCE.latitude,
+          lng: SOURCE_GEOFENCE.longitude,
+          radius: SOURCE_GEOFENCE.radiusMeters
+        },
+        destinationGeofence: {
+          lat: DESTINATION_GEOFENCE.latitude,
+          lng: DESTINATION_GEOFENCE.longitude,
+          radius: DESTINATION_GEOFENCE.radiusMeters
+        },
+        loadWeight,
+        tripStatus: activeTrip.status,
+        inSource,
+        inDestination,
+        hasLeftSource: activeTrip.hasLeftSource
+      });
+
+      // Map AI violations into the trip's violation tracking
+      if (aiResult.violationDetected) {
+        const aiViolationMap = {
+          'ROUTE_DEVIATION': 'route_deviation',
+          'SUSPICIOUS_STOP': 'suspicious_stop',
+          'UNAPPROVED_ZONE': 'unapproved_zone'
+        };
+        const mappedType = aiViolationMap[aiResult.violationType];
+        if (mappedType && !activeTrip.violationType.includes(mappedType)) {
+          activeTrip.violationType.push(mappedType);
+          activeTrip.violated = true;
+        }
+        activeTrip.aiReasoning = aiResult.aiReasoning;
+      }
+
+      // Expose AI context to the vehicle snapshot for debugging / dashboard
+      state.latestVehicle.aiZoneStatus = aiResult.zoneStatus;
+      state.latestVehicle.aiConfidence = aiResult.confidence;
+      state.latestVehicle.aiReasoning = aiResult.aiReasoning;
+    } catch (aiErr) {
+      // Fail-safe: AI errors never block core geofencing
+      console.error(`[AI Geofence] Non-critical error for ${vehicleNumber}: ${aiErr.message}`);
+    }
+
     // ── 3. Vehicle reached DESTINATION after leaving source → close trip ──
     if (inDestination && activeTrip.hasLeftSource) {
       activeTrip.destination = { latitude, longitude, arrivedAt: timestamp };
@@ -274,6 +323,9 @@ const processVehicleUpdate = async (deviceId, snapshot) => {
       } catch (err) {
         console.error('Failed to increment daily trip count:', err.message);
       }
+
+      // Clean up AI in-memory state for this vehicle
+      resetVehicleState(vehicleNumber);
 
       // Remove from active trips
       state.activeTrips = state.activeTrips.filter((t) => t.deviceId !== deviceId);
